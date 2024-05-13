@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN true
 
 ENV CHROMEDRIVER_VERSION=113.0.5672.63
+# ENV CHROMEDRIVER_VERSION=120.0.6099.10900
 
 # Google Chrome
 # =============
@@ -25,7 +26,7 @@ RUN wget -q https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/
 RUN wget -q 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F1121461%2Fchrome-linux.zip?generation=1679615958002864&alt=media' -O /tmp/chrome_113.zip && \
     unzip /tmp/chrome_113.zip -d /usr/local/bin && \
     rm /tmp/chrome_113.zip && \
-    mv /usr/local/bin/chrome-linux /usr/local/bin/chrome_113
+    mv /usr/local/bin/chrome-linux /usr/local/bin/chrome
 
 # Python
 # ==========
@@ -34,7 +35,7 @@ RUN apt-get install -y --no-install-recommends \
 
 #mpstat
 # ==========
-# RUN apt-get install && apt-get install -y sysstat
+RUN apt-get install && apt-get install -y sysstat
 
 RUN apt-get update && apt-get install -y xvfb
 
@@ -64,9 +65,6 @@ RUN chmod +x /home/seluser/measure/browsermob-proxy-2.1.4/bin/browsermob-proxy
 
 ADD cpu.py \
     stats.py \
-    /home/seluser/measure/
-
-ADD data.py \
     /home/seluser/measure/
 
 ADD ram.py \

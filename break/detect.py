@@ -112,10 +112,11 @@ def initialize_driver(extn, num_tries):
         try:
             options = Options()
             extensions_path = pathlib.Path("../extensions/")
-            options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36")
-            options.binary_location = "../chrome_113/chrome"
+            options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            options.binary_location = "../chrome_120/chrome"
             # service = Service(executable_path='/home/ritik/work/pes/chromedriver_113/chromedriver')
-            version = '113.0.5672.0'
+            # version = '113.0.5672.0'
+            version = '120.0.6099.10900'
             service = Service(ChromeDriverManager(version).install())
 
             matches = list(extensions_path.glob("{}*.crx".format(extn)))
@@ -216,9 +217,10 @@ if __name__ == "__main__":
         updated_dict = json.load(f)
     f.close()
 
-    SIZE = 10 # number of browser windows that will open
+    SIZE = 3 # number of browser windows that will open
 
-    latest_list = list(updated_dict.keys())[156:176]
+    latest_list = list(updated_dict.keys())
+    # latest_list = ['geeksforgeeks.org', 'reuters.com', 'forbes.com']
 
     chunks_list = list(divide_chunks(latest_list, SIZE))
     manager = multiprocessing.Manager()
@@ -247,7 +249,7 @@ if __name__ == "__main__":
                 for job in jobs:
                     job.start()
 
-                TIMEOUT = 1000
+                TIMEOUT = 180
                 start = time.time()
                 for job in jobs:
                     print(f"joining {job}")

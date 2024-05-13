@@ -32,7 +32,7 @@ def run():
             stderr = run.stderr
 
             parse(stdout)
-            print(data)
+            # print(data)
             time.sleep(1.5)                
         except subprocess.CalledProcessError as e:
             log.error(f"Error collecting performance events: {e}")

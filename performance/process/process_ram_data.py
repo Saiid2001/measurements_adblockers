@@ -29,12 +29,7 @@ extn_lst = [
        "decentraleyes",
        "disconnect",
        "ghostery",
-       "https",
-       "noscript",
-       "scriptsafe",
-       "canvas-antifp",
-       "adguard",
-       "user-agent"]
+       "adguard"]
 
 data_dict = {
     'websites': list(data['control'].keys())

@@ -1,6 +1,3 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import argparse
 import json
 import logging.config
@@ -11,6 +8,11 @@ import time
 import uuid
 import threading
 import multiprocessing
+import os
+
+def run_child_file():
+    # Import and execute the child Python file
+    import docker_stats
 
 def divide_chunks(l, n):
     # looping till length l
@@ -18,19 +20,15 @@ def divide_chunks(l, n):
         yield l[i:i + n]
 
 def run(log, browser, configurations, domains, cpu):
-    # random.shuffle(domains)
+    random.shuffle(domains)
     for domain in domains:
         # We always visit with the website without any extensions first to
         # warm up the upstream DNS cache.
-        
-        # COMMENTING THE NEXT LINE JUST FOR USER-AGENT CASE. UNCOMMENT IT AFTER
         # run_configuration(log, browser, "", domain, cpu)
 
-        # random.shuffle(configurations)
-        # for extension in configurations:
-        #     run_configuration(log, browser, extension, domain, cpu)
-        run_configuration(log, browser, '', domain, cpu)
-
+        random.shuffle(configurations)
+        for extension in configurations:
+            run_configuration(log, browser, extension, domain, cpu)
 
 def run_configuration(log, browser, extension, domain, cpu):
     log.info(f"Collecting mpstat data via {browser} with '{extension}' for '{domain}' on cpu '{cpu}'")
@@ -40,40 +38,32 @@ def run_configuration(log, browser, extension, domain, cpu):
     except Exception as e:
         log.error(f"Unknown error for domain '{domain}': {e}")
 
-
 def get_domain(log, browser, extension, domain, cpu):
     try:
-        # cmd = ["docker", "run", "--rm",
-        #         "-v", "/dev/shm:/dev/shm",
-        #         "-v", "./chrome/data:/data",
-        #         "--cpuset-cpus", cpu,
-        #        "--security-opt", "seccomp=seccomp.json",
-        #        f"mpstat-{browser}",
-        #        "--extensions", extension, "--cpu", cpu, domain]
-        cmd = ["docker", "run", "--rm",
+        strip_domain = domain.split('//')
+        if len(strip_domain) == 2:
+            container_name = f'{extension}_{strip_domain[1]}'
+        else:
+            container_name = f'{extension}_{strip_domain[0]}'
+        
+        env_var = f'CUSTOM_CMD=python3 /home/seluser/measure/ram.py "--extensions" {extension} --cpu {cpu} {domain}'
+        cmd = ["docker", "run", "--name", container_name,
+                "--rm", "-m", "4g",
                 "-v", "/dev/shm:/dev/shm",
                 "-v", "./chrome/data:/data",
                 "--cpuset-cpus", cpu,
-               "--security-opt", "seccomp=seccomp.json",
-               f"mpstat-{browser}",
-                "--cpu", cpu, domain]
+               "--security-opt", "seccomp=./seccomp.json",
+               "-e", env_var,
+               f"mpstat-{browser}"]
         # we can use "--shm-size=2g" instead of /dev/shm:/dev/shm
-        
         run = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
-        log.error(f"Error in container for '{domain}': {e.output}")
+        print(f"Error in container for '{domain}': {e.output}")
     
     stdout = run.stdout.decode('utf-8')
     stderr = run.stderr.decode('utf-8')
     print('STDOUT:', stdout) 
     print('STDERR:', stderr)
-    log.info(stdout)
-    log.error(stderr)
-    
-    #try:
-    #    har = run.stdout.decode('utf-8')
-    #except Exception as e:
-    #    log.error(f"Error decoding output for domain {domain}: {e}")
 
 def main():
     # Parse command line arguments
@@ -81,7 +71,7 @@ def main():
     parser.add_argument('log', default="logs/measurement.log")
     #parser.add_argument('database_config_file')
     parser.add_argument('domains_list_file')
-    #parser.add_argument('experiment')
+    parser.add_argument('cpus')
     parser.add_argument('browser')
     args = parser.parse_args()
 
@@ -103,28 +93,10 @@ def main():
             #     break
     f.close()
 
-    # domains = domains[:10]
-
-    # with open("../../../adblock_detect/failed_sites.txt", "r") as f:
-    #    failed_sites = f.read().splitlines()
-    #    for site in failed_sites:
-    #        domains.append(site)
-    # f.close()
-
-    # extensions_configurations = [
-    #     # No extensions
-    #     "",
-    #     # Extensions on their own
-    #     "adblock",
-    #     "privacy-badger",
-    #     "ublock",
-    #     # Combinations
-    # ]
-    
     extensions_configurations = [
        # No extensions
-    #    "",
-    #    # Extensions on their own
+       "control",
+       # Extensions on their own
        "adblock",
        "decentraleyes",
        "disconnect",
@@ -132,14 +104,13 @@ def main():
        "privacy-badger",
        "ublock",
        "adguard"
-       # Combinations
+    # Combinations
     #    "decentraleyes,privacy_badger,ublock_origin"
     ]
 
 
     # RUNNING 4 DOCKERS ON 4 DIFFERENT CPU CORES
-    # cpus_list = ['0','1','2','3']
-    cpus_list = [str(cpu) for cpu in range(25)]
+    cpus_list = [str(cpu) for cpu in range(int(args.cpus))]
     thread_list = []
     domain_set = list(divide_chunks(domains, int(len(domains)/len(cpus_list))))
     print(domain_set)
@@ -147,6 +118,8 @@ def main():
         # thread_list.append(threading.Thread(target=run, args=(log, args.browser, extensions_configurations, domain_set[i], cpus_list[i],)))
         thread_list.append(multiprocessing.Process(target=run, args=(log, args.browser, extensions_configurations, domain_set[i], cpus_list[i],)))
     
+    # subprocess.Popen(["python3", "docker_stats.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.PIPE)
+
     log.info("starting threads ....")
     for thread in thread_list:
         log.info(f"Starting run for '{thread}'")
@@ -162,4 +135,8 @@ def main():
 
 
 if __name__ == '__main__':
+    child_process = multiprocessing.Process(target=run_child_file)
+    child_process.start()
     main()
+
+

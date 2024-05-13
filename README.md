@@ -26,6 +26,8 @@ This code has been used to obtain (fully/partially) the results of following res
 
 # Setup
 
+Run `bash setup.sh` to install chrome version 120 that will be used for testing. The version can be changed to a different one in the script by changing the download url.
+
 ## Prerequisites
 
 ## Installation
@@ -35,14 +37,16 @@ In our paper [1], we identify five major concerns that users often highlight in 
 
 ## Performance
 Some of the performance measurement code skeleton has been borrowed from the work done by Borgolte et al. [2].
+We measure 2 metrics viz. CPU, Data and RAM usage. Respective codes for each metric is available in [Performance](https://github.com/Racro/measurements_user-concerns/tree/main/performance) folder and instructions are attached in [here](https://github.com/Racro/measurements_user-concerns/tree/main/performance/README.md).
 
 ## Web Compatibility
+Refer to [break](https://github.com/Racro/measurements_user-concerns/tree/main/break) folder for scripts on disable ad prompt detection. `detect.py` script provides support for that.
 
 ## Extension effectiveness
-
-## Data and Privacy Policy
+Refer to [effective](https://github.com/Racro/measurements_user-concerns/tree/main/effective) folder for scripts on ads and third_party urls.
 
 ## Default configurations
+We provide code for comparing the acceptable ad allowlist of ABP with blocklists of other extensions. `updates_config/compare.py` script provides support for that.
 
 # References
 [1] Roongta, R., & Greenstadt, R. (2024). [From User Insights to Actionable Metrics: A User-Focused Evaluation of Privacy-Preserving Browser Extensions](https://doi.org/10.1145/3634737.3657028). In Proceedings of the ACM Asia Conference on Computer and Communications Security (ASIA CCS ’24).

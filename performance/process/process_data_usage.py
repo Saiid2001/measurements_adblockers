@@ -15,52 +15,10 @@ extn_lst = ['control', 'adblock'
     "decentraleyes",
     "disconnect",
     "ghostery",
-    "https",
-    "noscript",
-    "scriptsafe",
-    "canvas-antifp",
-    "adguard",
-    "user-agent"
-    ]
+    "adguard"]
 
 path = f"./data_1000_content/"
 dir_list = os.listdir(path)
-
-# extn_lst = ['control', 'adblock', 'ublock', 'privacy-badger']
-extn_lst = [
-    'control', 'adblock', 'ublock', 'privacy-badger',
-       "decentraleyes",
-       "disconnect",
-       "ghostery",
-       "https",
-       "noscript",
-       "scriptsafe",
-       "canvas-antifp",
-       "adguard",
-       "user-agent"]
-
-# data_dict = {
-#     'websites': []
-# }
-
-# for extn in extn_lst:
-#     data_dict[extn] = [] # data_dict = {'websites': [list_of_websites], 'extn_lst[i]': [list of [usr, sys, iowait, stats]]}
-
-# faulty_sites = {}
-# # faulty_extn = {}
-# for extn in extn_lst:
-#     faulty_sites[extn] = []
-
-# def check_for_keys(website_data, website): 
-#     # website_data -> data dict of each website, website -> website
-#     global faulty_sites
-#     for extn in extn_lst:
-#         if extn == 'control':
-#             if f'/data/{website}' not in website_data.keys():
-#                 faulty_sites[extn].append(website)
-#         else:
-#             if extn not in website_data.keys():
-#                 faulty_sites[extn].append(website)
 
 # load all the data from the files in 1 dictionary
 all_data = {}

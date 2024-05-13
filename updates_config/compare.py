@@ -1,11 +1,19 @@
 import os
 import sys
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--extn', type=str)
+if len(sys.argv) < 2:
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+args = parser.parse_args()
 
 f = open('filterlist/exceptionrules.txt', 'r')
 accept_ads = f.readlines()
 f.close()
 
-path = "filterlist/ghostery/"
+path = f"filterlist/{args.extn}/"
 dir_list = os.listdir(path)
 
 rules = []
@@ -44,13 +52,11 @@ for rule in accept_ads:
         domain = domain.split('\n')[0]        
         rules_exception.append(domain)
 
-#f = open('conflicts_ghostery.txt', 'w')
 count = 0
-# print(len(rules_exception))
-# print(len(rules_blocked))
-# sys.exit(0)
+
 
 match_list = []
+f = open(f'{args.extn}.log', 'w')
 for exception in rules_exception:
     for rule in rules_blocked:
         # match = os.path.commonprefix([exception.split('/')[0], rule.split('/')[0]])

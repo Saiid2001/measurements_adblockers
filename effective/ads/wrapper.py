@@ -97,7 +97,7 @@ def run(sites, extn, return_dict, l):
 
 if __name__ == "__main__":
     try:
-        with open("../../break/adblock_detect/inner_pages_custom.json", "r") as f:
+        with open("../../inner_pages_custom.json", "r") as f:
             updated_dict = json.load(f)
         f.close()
         # with open("../../adblock_detect/failed_sites.txt", "r") as f:

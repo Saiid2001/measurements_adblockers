@@ -21,8 +21,8 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
     }
     else{
         p_args= [
-            `--disable-extensions-except=./../../extensions/extn_src/${args[3]}`,
-            `--load-extension=./../../extensions/extn_src/${args[3]}`,
+            `--disable-extensions-except=./../../../extensions/extn_src/${args[3]}`,
+            `--load-extension=./../../../extensions/extn_src/${args[3]}`,
             '--display='+xvfb._display,
             '--window-size=1280, 720'
         ];
@@ -31,7 +31,7 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
     const browser = await puppeteer.launch({
         headless: false,
         args: p_args,
-        executablePath: '../chrome_113/chrome'
+        executablePath: '../../../chrome_120/chrome'
     });
 
     await delay(3000);
@@ -74,7 +74,7 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
         
         try{
             await page.goto(site, { waitUntil: 'networkidle2', timeout: 60000 });
-            await page.waitForTimeout(2000);
+            await delay(2000);
             var metrics = await page.metrics();
             frames += metrics[ 'Frames' ];
             docs += metrics[ 'Documents' ];

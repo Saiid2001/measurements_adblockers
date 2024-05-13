@@ -80,7 +80,7 @@ def main(number_of_tries, flag, args_lst):
     options.add_argument("--disable-features=AudioServiceOutOfProcess")
     options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36") 
     #options.add_extension("/home/seluser/measure/harexporttrigger-0.6.3.crx")
-    options.binary_location = "/usr/bin/google-chrome"
+    options.binary_location = "/usr/local/bin/chrome/chrome"
 
     if flag == 1:
         driver = webdriver.Chrome(options=options)

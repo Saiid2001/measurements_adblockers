@@ -20,6 +20,7 @@ from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 extensions_configurations = [
     # No extensions
@@ -72,19 +73,22 @@ def main(num_tries, args_lst, proxy):
     # options.add_argument("auto-open-devtools-for-tabs")
     options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36") 
     #options.add_extension("/home/seluser/measure/harexporttrigger-0.6.3.crx")
-    options.binary_location = "/home/ritik/pes/chrome_113/chrome"
-    # options.binary_location = "/usr/bin/google-chrome"
-    # options.binary_location = "/home/ritik/work/pes/chrome_113/chrome"
+    # options.binary_location = "../../../../chrome_120/chrome"
+    options.binary_location = "../../chrome_120/chrome"
+ 
     extn = ''
     if args_lst[-1] != "":
         extn = args_lst[-2]
         options.add_extension(args_lst[-1])
 
     # Initialize service
-    service = Service(executable_path='/usr/local/bin/chromedriver')
+    # service = Service(executable_path='/usr/local/bin/chromedriver')
+    version = '120.0.6099.10900'
+    service = Service(ChromeDriverManager(version).install())
 
     for i in range(num_tries):
         # Launch Chrome and install our extension for getting HARs
+        # driver = webdriver.Chrome(options=options)
         driver = webdriver.Chrome(service=service, options=options)
         driver.set_page_load_timeout(args_lst[1])
 
@@ -175,7 +179,11 @@ if __name__ == '__main__':
 
     websites = ast.literal_eval(args.website)
     print(f'data --- {websites}')
-    fname = './chrome/data/' + websites[0].split('//')[1]
+    
+    if not os.path.exists('./data_usage'):
+        os.makedirs('./data_usage')
+    
+    fname = './data_usage/' + websites[0].split('//')[1]
     extn = args.extension
     args_lst = [websites, args.timeout]
 
@@ -184,12 +192,12 @@ if __name__ == '__main__':
     #     main(3, 1, args_lst)
 
     data_dict = {}
-    # extensions_path = pathlib.Path("/home/seluser/measure/extensions/extn_crx")
-    extensions_path = pathlib.Path("/home/ritik/pes/measurements/extensions/extn_crx")
+
+    extensions_path = pathlib.Path("../../extensions/extn_crx")
     
     # Initialize BrowserMob Proxy
-    # server = Server("/home/ritik/work/pes/browsermob-proxy/bin/browsermob-proxy")
-    server = Server("/home/ritik/pes/browsermob-proxy/bin/browsermob-proxy")
+
+    server = Server("./browsermob-proxy/bin/browsermob-proxy")
     server.start()
     proxy = server.create_proxy()
     
