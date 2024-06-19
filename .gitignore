@@ -18,10 +18,10 @@ out
 **/__pycache__
 **/proxy/data
 **/*.tar.gz
+**/*.zip
 **/xlsx
 **/data_1000
 **/blacklists
 **/strippeddownblacklist.txt
 **/path_ss
 **/json_time
-**/*.png
