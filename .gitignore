@@ -15,7 +15,6 @@ out
 **/wpr_data
 **/*.xlsx
 **/*.pyc
-**/*.json
 **/__pycache__
 **/proxy/data
 **/*.tar.gz
