@@ -1,4 +1,3 @@
-# For non-docker related measurements
 mkdir -p chrome_120
 
 pushd "./chrome_120" > /dev/null
@@ -8,10 +7,4 @@ unzip chrome_120.zip && \
 mv chrome-linux/* ./ && \
 rm -rf chrome-linux chrome_120.zip
 
-popd > /dev/null
-
-# For docker measurements (performance)
-pushd "./performance/docker/chrome" > /dev/null
-mkdir data
-chmod 777 data
 popd > /dev/null
