@@ -1,3 +1,5 @@
+# This setup for non-docker related experiments
+
 mkdir -p chrome_120
 
 pushd "./chrome_120" > /dev/null
