@@ -4,8 +4,14 @@
 
 set -e
 
-SELFPATH=$(dirname $(realpath "$0"))
+# Check if the correct number of arguments are provided
+if [ "$#" -ne 5 ]; then
+    echo "Usage: bash $0 <LOGS_PATH> <DOMAINS_LIST_PATH> <METRIC> <CPUS> <BROWSER>"
+    echo "Example: bash $0 logs  ../../websites_inner_pages.json cpu 4 chrome"
+    exit 1
+fi
 
+SELFPATH=$(dirname $(realpath "$0"))
 LOGS=$(realpath "${1}")
 DOMAINS_LIST=$(realpath "${2}")
 METRIC=${3}
