@@ -39,7 +39,7 @@ RUN apt-get install && apt-get install -y sysstat
 
 RUN apt-get update && apt-get install -y xvfb
 
-RUN apt-get install -y libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev liboss4-salsa-asound2 libasound2t64  default-jre
+RUN apt-get install -y libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2-dev libasound2 default-jre
 
 ADD requirements.txt /tmp/
 RUN pip3 install -U -r /tmp/requirements.txt && \
