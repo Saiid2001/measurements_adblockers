@@ -1,7 +1,7 @@
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
 ENV CHROMEDRIVER_VERSION=113.0.5672.63
 # ENV CHROMEDRIVER_VERSION=120.0.6099.10900
@@ -30,8 +30,8 @@ RUN wget -q 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-s
 
 # Python
 # ==========
-RUN apt-get install -y --no-install-recommends \
-        python3 python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3.10-venv
 
 #mpstat
 # ==========
@@ -69,6 +69,15 @@ ADD cpu.py \
 
 ADD ram.py \
     /home/seluser/measure/
+
+ADD test.py \
+    /home/seluser/measure/
+
+
+ADD filterlists/ \
+    /home/seluser/measure/filterlists
+    
+RUN apt-get install -y --no-install-recommends xvfb xserver-xephyr tigervnc-standalone-server x11-utils gnumeric
 
 COPY entrypoint.sh /home/seluser/measure/
 RUN chmod +x /home/seluser/measure/entrypoint.sh

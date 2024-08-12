@@ -41,7 +41,7 @@ class Stats(threading.Thread):
             self.pid = self.process.pid
             # self.process.wait()
         except subprocess.CalledProcessError as e:
-            log.error(f"Error collecting performance events: {e}")
+            print(f"Error collecting performance events: {e}")
 
     def stop(self):
         try:

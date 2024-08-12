@@ -29,6 +29,7 @@ This code has been used to obtain (fully/partially) the results of following res
 Run `bash setup.sh` to install chrome version 120 that will be used for testing. The version can be changed to a different one in the script by changing the download url.
 
 ## Prerequisites
+- `python3` and `python3.10-venv`
 
 ## Installation
 

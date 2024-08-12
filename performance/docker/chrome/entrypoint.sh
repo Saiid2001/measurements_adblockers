@@ -8,6 +8,5 @@ cmd="echo Hello, world!"
 if [ -n "$CUSTOM_CMD" ]; then
   cmd=$CUSTOM_CMD
 fi
-
 # Execute the command
 eval $cmd

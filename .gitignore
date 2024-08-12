@@ -25,3 +25,9 @@ out
 **/strippeddownblacklist.txt
 **/path_ss
 **/json_time
+**/data/
+**/data_*/
+**/measure
+performance/*.pdf
+**/stats_*/*.pdf
+plot_performance.json
