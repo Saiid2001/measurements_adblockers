@@ -73,6 +73,9 @@ ADD ram.py \
 ADD test.py \
     /home/seluser/measure/
 
+ADD web.py \
+    /home/seluser/measure/
+
 
 ADD filterlists/ \
     /home/seluser/measure/filterlists

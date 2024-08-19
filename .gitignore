@@ -26,8 +26,10 @@ out
 **/path_ss
 **/json_time
 **/data/
+**/webdata/
 **/data_*/
 **/measure
 performance/*.pdf
 **/stats_*/*.pdf
 plot_performance.json
+performance/process/web_data_stats/

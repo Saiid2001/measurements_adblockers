@@ -20,12 +20,12 @@ BROWSER=${5}
 
 mkdir -p ${LOGS}
 
-if [ "${3}" = "cpu" ] || [ "${3}" = "ram" ]; then 
-    echo "Testing for Metric ${METRIC}"
-else 
-    echo "Metric not in cpu|ram"
-    exit 0
-fi 
+# if [ "${3}" = "cpu" ] || [ "${3}" = "ram" ]; then 
+#     echo "Testing for Metric ${METRIC}"
+# else 
+#     echo "Metric not in cpu|ram"
+#     exit 0
+# fi 
 
 if [ "${5}" = "chrome" ] || [ "${5}" = "firefox" ]; then 
     echo "Testing on Browser ${Browser}"
@@ -43,7 +43,9 @@ popd > /dev/null
 
 # create data directory with suitable permissions
 mkdir -p "${SELFPATH}/chrome/data"
+mkdir -p "${SELFPATH}/chrome/webdata"
 sudo chmod 777 "${SELFPATH}/chrome/data"
+sudo chmod 777 "${SELFPATH}/chrome/webdata"
 
 # source ~/work/pes/pes/bin/activate
 python3 -m venv ./measure
