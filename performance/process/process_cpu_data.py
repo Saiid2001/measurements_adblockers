@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 from email.policy import default
+from multiprocessing import Pool
 import os
 import json
 import numpy as np
@@ -56,14 +57,14 @@ plt.rcParams["axes.prop_cycle"] = plt.cycler(
 
 RULE_COUNTS = {
     "adguard": {
-        "default": 119141,
-        "mid": 417331,
-        "all": 772743
+        "default": "1k",
+        "mid": "4k",
+        "all": "8k"
     },
     "ublock": {
-        "default": 203834,
-        "mid": 574187,
-        "all": 717354
+        "default": "2k",
+        "mid": "6k",
+        "all": "7k"
     },
 }
 
@@ -100,7 +101,7 @@ def generate_stats_dict(data_dict):
         if extn == 'control':
             continue
         
-        plt.figure()
+        plt.figure(figsize=(4,3))
         
         for fl, c in tqdm(zip(fl_lst, colors), desc=f"Plotting for {extn}", total=len(fl_lst)):
             # extn_stat.append(np.array(stat_plot[1][extn]))
@@ -143,7 +144,7 @@ def generate_stats_dict(data_dict):
 
 
         # # plot
-            plt.plot(np.sort(np.array(y) * 100), label = f"{fl}: {RULE_COUNTS[extn][fl]} rules", color=c)
+            plt.plot(np.sort(np.array(y) * 100), label = f"{fl}: {RULE_COUNTS[extn][fl]} rules", color=c, linewidth=2, alpha=0.7)    
             # plt.axhline(np.median(np.array(y) * 100), linestyle='dashed', color=c)
             
         plt.legend()
@@ -153,7 +154,7 @@ def generate_stats_dict(data_dict):
         plt.yscale('log')
         
         plt.show()
-        plt.savefig(f'stat_{extn}.pdf')
+        plt.savefig(f'stat_{extn}.pdf', bbox_inches='tight')
         
         # print the medians
         print(f"{extn} median LOAD TIME (std) (%):")
@@ -167,7 +168,7 @@ def generate_stats_dict(data_dict):
     # f.close()
 
 # list of all files in /data folder
-path = f"/home/ubuntu/measurements_adblockers/performance/docker/chrome/data/"
+path = f"/home/ubuntu/measurements_adblockers/performance/docker/chrome/data_stop/"
 dir_list = os.listdir(path)
 
 # extn_lst = ['control', 'adblock', 'ublock', 'privacy-badger']
@@ -253,11 +254,25 @@ def check_for_keys(website_data, website):
 
 # load all the data from the files in 1 dictionary
 all_data = {}
-for website in tqdm(dir_list, desc="Loading data"):
-    f = open(path+website, 'r')
-    data = json.load(f)
-    f.close()
-    all_data[website] = data
+
+
+def load_website(website):
+    with open(path+website, 'r') as f:
+        return {**json.load(f)}
+
+site_data = []
+
+with Pool(12) as p:
+    site_data = list(tqdm(p.imap(load_website, dir_list), total=len(dir_list)))
+    
+all_data = dict(zip(dir_list, site_data))
+
+
+# for website in tqdm(dir_list, desc="Loading data"):
+#     f = open(path+website, 'r')
+#     data = json.load(f)
+#     f.close()
+#     all_data[website] = data
 
 # populate the faulty_sites dict
 for website in all_data:
