@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import json
+import sys
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -9,10 +10,24 @@ from multiprocessing import Pool
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-DATA_DIR = Path(__dir__).parent / "docker/chrome/webdata"
-OUT_DIR = Path(__dir__) / "web_data_stats"
+# get the datapath from the command line
+if len(sys.argv) < 3:
+    print("Usage: python3 process_web_data.py <data_path> <output_path>")
+    sys.exit(1)
 
-os.makedirs(OUT_DIR, exist_ok=True)
+DATA_PATH = Path(sys.argv[1])
+
+if not os.path.exists(DATA_PATH) or not os.path.isdir(DATA_PATH):
+    print("Invalid path")
+    sys.exit(1)
+
+OUTPUT_PATH = Path(sys.argv[2])
+
+if not os.path.exists(OUTPUT_PATH) or not os.path.isdir(OUTPUT_PATH):
+    print("Invalid path")
+    sys.exit(1)
+
+OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 
 def load_website(site_fp):
@@ -25,7 +40,7 @@ site_data = []
 
 with Pool(12) as p:
     site_data = list(
-        tqdm(p.imap(load_website, DATA_DIR.rglob("stats.json")), total=30000)
+        tqdm(p.imap(load_website, DATA_PATH.rglob("stats.json")), total=30000)
     )
 
 
@@ -59,7 +74,7 @@ def lazy_loading_stats(site_data):
 
     lazy_loading_df = pd.DataFrame(lazy_loading)
 
-    lazy_loading_df.to_csv(OUT_DIR / "lazy_loading_stats.csv", index=False)
+    lazy_loading_df.to_csv(OUTPUT_PATH / "lazy_loading_stats.csv", index=False)
 
     print("-------------------------")
     print("LAZY LOADING STATS")
@@ -133,7 +148,7 @@ def container_style_stats(site_data):
 
     container_styles_df = pd.DataFrame(container_styles)
 
-    container_styles_df.to_csv(OUT_DIR / "container_style_stats.csv", index=False)
+    container_styles_df.to_csv(OUTPUT_PATH / "container_style_stats.csv", index=False)
 
     print("-------------------------")
     print("CONTAINER STYLE STATS")
@@ -228,7 +243,7 @@ def image_alt_stats(site_data):
 
     image_alts_df = pd.DataFrame(image_alts)
 
-    image_alts_df.to_csv(OUT_DIR / "image_alt_stats.csv", index=False)
+    image_alts_df.to_csv(OUTPUT_PATH / "image_alt_stats.csv", index=False)
 
     print("-------------------------")
     print("IMAGE ALT STATS")
@@ -320,7 +335,7 @@ def iframe_post_message_stats(site_data):
     iframe_post_message_df = pd.DataFrame(iframe_post_message)
 
     iframe_post_message_df.to_csv(
-        OUT_DIR / "iframe_post_message_stats.csv", index=False
+        OUTPUT_PATH / "iframe_post_message_stats.csv", index=False
     )
 
     print("-------------------------")
@@ -437,7 +452,7 @@ def animation_stats(site_data):
 
     stats_df = pd.DataFrame(stats)
 
-    stats_df.to_csv(OUT_DIR / "animation_stats.csv", index=False)
+    stats_df.to_csv(OUTPUT_PATH / "animation_stats.csv", index=False)
 
     print("-------------------------")
     print("ANIMATION STATS")
@@ -541,5 +556,5 @@ stats["image_alt"] = image_alt_stats(site_data)
 stats["iframe_post_message"] = iframe_post_message_stats(site_data)
 stats["animation"] = animation_stats(site_data)
 
-with open(OUT_DIR / "stats.json", "w") as f:
+with open(OUTPUT_PATH / "stats.json", "w") as f:
     f.write(json.dumps(make_json_serializable(stats), indent=4))

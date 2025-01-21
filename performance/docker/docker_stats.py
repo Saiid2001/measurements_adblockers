@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-import collections
-import csv
-import io
-import os
-import signal
 import subprocess
-import threading
 import json
 import time
-import hashlib
-import random 
 import re
+import logging
 import math
+
+log = logging.getLogger('docker_stats')
 
 data = {}
 val = 1
 count = 0
+
+
 
 def run():
     global data

@@ -4,12 +4,8 @@
 import argparse
 import json
 import logging.config
-import random
-import re
 import subprocess
 import time
-import uuid
-import threading
 import multiprocessing
 
 def divide_chunks(l, n):
@@ -20,22 +16,13 @@ def divide_chunks(l, n):
         else:
             yield l[i:i + n]
 
-def run(log, browser, configurations, domains, cpu):
+def run(log, browser, domains, cpu):
     # random.shuffle(domains)
     for _domains in divide_chunks(domains, 10):
-        # We always visit with the website without any extensions first to
-        # warm up the upstream DNS cache.
-        
-        # COMMENTING THE NEXT LINE JUST FOR USER-AGENT CASE. UNCOMMENT IT AFTER
-        # run_configuration(log, browser, "", domain, cpu)
-
-        # random.shuffle(configurations)
-        # for extension in configurations:
-        #     run_configuration(log, browser, extension, domain, cpu)
         run_configuration(log, browser, _domains, cpu)
 
 
-def run_configuration(log, browser,  domains, cpu):
+def run_configuration(log, browser, domains, cpu):
     log.info(f"Collecting mpstat data via {browser} for '{domains}' on cpu '{cpu}'")
     try:
         get_domain(log, browser, domains, cpu)
@@ -128,8 +115,7 @@ def main():
     domain_set = list(divide_chunks(domains, int(len(domains)/len(cpus_list))))
     print(domain_set)
     for i in range(len(cpus_list)):
-        # thread_list.append(threading.Thread(target=run, args=(log, args.browser, extensions_configurations, domain_set[i], cpus_list[i],)))
-        thread_list.append(multiprocessing.Process(target=run, args=(log, args.browser, extensions_configurations, domain_set[i], cpus_list[i],)))
+        thread_list.append(multiprocessing.Process(target=run, args=(log, args.browser, domain_set[i], cpus_list[i],)))
     
     log.info("starting threads ....")
     for thread in thread_list:

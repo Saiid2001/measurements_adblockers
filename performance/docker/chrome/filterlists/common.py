@@ -39,10 +39,9 @@ extensions_mid_filterlists = {
         "ublock-badware",
         "easylist",
         "easyprivacy",
-        "urlhaus-1", 
+        "urlhaus-1",
         "plowe-0",
         "ublock-quick-fixes",
-        # "ublock-abuse",
         "ublock-annoyances",
         "adguard-mobile",
         "fanboy-cookiemonster",
@@ -61,7 +60,6 @@ extensions_mid_filterlists = {
         "adguard-cookies",
         "RUS-0",
         "FRA-0",
-        # "curben-pup",
         "adguard-popup-overlays",
     ],
 }
@@ -82,6 +80,7 @@ def _get_extension_id(profile_path):
 
 
 def wait_until_extension(profile_path, timeout=60, period=0.25, min_time=0):
+    """Wait until an extension is found in the profile path"""
     start_time = time.time()
     mustend = time.time() + timeout
     while time.time() < mustend:
@@ -94,7 +93,8 @@ def wait_until_extension(profile_path, timeout=60, period=0.25, min_time=0):
     raise Exception("Extension not found")
 
 
-def get_extension_id(driver, extension_name):
+def get_extension_id(driver):
+    """Get the extension id of the extension with the given name"""
 
     driver.get("chrome://version")
     wait_until_loaded(driver, 10)
@@ -108,10 +108,12 @@ def get_extension_id(driver, extension_name):
 
 
 def is_loaded(webdriver):
+    """Check if the page is loaded"""
     return webdriver.execute_script("return document.readyState") == "complete"
 
 
 def wait_until_loaded(webdriver, timeout=60, period=0.25, min_time=0):
+    """Wait until the page is loaded"""
     start_time = time.time()
     mustend = time.time() + timeout
     while time.time() < mustend:

@@ -3,19 +3,12 @@
 
 import argparse
 import json
-import pathlib
-import random
-import shutil
-import subprocess
 import sys
 import time
+
 # import threading
 import os
-from datetime import datetime
 import traceback
-
-from filterlists import common, adguard, ublock
-import stats
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -24,10 +17,14 @@ from selenium.webdriver.common.by import By
 
 vdisplay: "Display"
 
+
 def is_loaded(webdriver):
+    """Check if the page is fully loaded."""
     return webdriver.execute_script("return document.readyState") == "complete"
 
+
 def wait_until_loaded(webdriver, timeout=60, period=0.25, min_time=0):
+    """Wait until the page is fully loaded or the timeout is reached."""
     start_time = time.time()
     mustend = time.time() + timeout
     while time.time() < mustend:
@@ -38,8 +35,10 @@ def wait_until_loaded(webdriver, timeout=60, period=0.25, min_time=0):
         time.sleep(period)
     return False
 
+
 def image_alt_stats(driver):
-    
+    """Get the image alt stats."""
+
     script = """
     // get the count of images with an alt attribute where the :before is styled with background-image
     var images = document.querySelectorAll('img[alt]:not([alt=""])');
@@ -66,14 +65,15 @@ def image_alt_stats(driver):
         'matches': matches
     }
     """
-    
+
     return driver.execute_script(script)
 
 
 def api_override(driver):
-    
+    """Override the postMessage and addEventListener functions to log messages."""
+
     # override postMessage to log messages
-    
+
     script = """
     
     //on window ready add this
@@ -103,11 +103,13 @@ def api_override(driver):
         });
     })();
     """
-    
+
     return driver.execute_script(script)
-    
+
+
 def iframe_and_post_message_stats(driver):
-    
+    """Get the iframe and postMessage stats."""
+
     script = """
     
     var iframes = [];
@@ -154,12 +156,13 @@ def iframe_and_post_message_stats(driver):
         'listenMessage': listenMessageLog,
     }
     """
-    
+
     return driver.execute_script(script)
-    
-    
+
+
 def lazy_loading_stats(driver):
-    
+    """Get the lazy loading attack-related statistics."""
+
     script = """
     var images = document.querySelectorAll('img');
     var lazyImages = Array.prototype.filter.call(images, function(image) {
@@ -183,10 +186,9 @@ def lazy_loading_stats(driver):
     return driver.execute_script(script)
 
 
+def container_style_queries(driver):
+    """Get css styles where @container is used."""
 
-def container_style_queries(driver):    
-    # get css styles where @container is used
-    
     # external stylesheets
     script = """
     var stylesheets = document.styleSheets;
@@ -212,14 +214,15 @@ def container_style_queries(driver):
     }
     return containerStyles;
     """
-    
+
     return driver.execute_script(script)
-    
-    
+
+
 def keyframes_with_background(driver):
-    
+    """Get the keyframes containing background-image styles."""
+
     # get keyframes with background-image
-    
+
     script = """
     var stylesheets = document.styleSheets;
     var keyframes = [];
@@ -247,25 +250,25 @@ def keyframes_with_background(driver):
     }
     return keyframes;
     """
-    
+
     return driver.execute_script(script)
-    
+
 
 def main(number_of_tries, flag, args_lst):
-    
+
     # Start X
     # vdisplay = Display(visible=False, size=(1920, 1080))
-    
+
     # cpu = int(args_lst[2])
-    
+
     # port = 5907 + cpu
     # vdisplay = Display(visible=True, size=(1920, 1080), backend='xvnc', rfbport=port)
-    
+
     # vdisplay.start()
 
     # Prepare Chrome
     options = Options()
-    #options.headless = False
+    # options.headless = False
     # options.add_argument("--headless=new")
     options.add_argument("no-sandbox")
     options.add_argument("--disable-animations")
@@ -276,61 +279,62 @@ def main(number_of_tries, flag, args_lst):
     options.add_argument("--disable-cache")
     options.add_argument("--disable-features=IsolateOrigins,site-per-process")
     options.add_argument("--disable-features=AudioServiceOutOfProcess")
-    options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36") 
-    #options.add_extension("/home/seluser/measure/harexporttrigger-0.6.3.crx")
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+    )
+    # options.add_extension("/home/seluser/measure/harexporttrigger-0.6.3.crx")
     options.binary_location = "/usr/local/bin/chrome/chrome"
 
-    
-
     # Install other addons
-    
+
     try:
         print(args_lst)
-        fname = '/data/' + args_lst[0].split('//')[1] + "/stats.json"
-        
-        # if os.path.exists(fname) and os.path.getsize(fname) > 0:
-        #     print(f"{args_lst[0]} already crawled. Skipping...")
-        #     return
-        
+        fname = "/data/" + args_lst[0].split("//")[1] + "/stats.json"
+
+        if os.path.exists(fname) and os.path.getsize(fname) > 0:
+            print(f"{args_lst[0]} already crawled. Skipping...")
+            return
+
         # if the file does not exist skip
         if not os.path.exists(fname):
             print(f"{args_lst[0]} does not exist. Skipping...")
             return
-        
-        f = open(fname, 'r')
+
+        f = open(fname, "r")
         stat_data = json.loads(f.read())
         f.close()
-        
-        if 'animation' in stat_data and all(['makesRequest' in i for i in stat_data['animation']]):
+
+        if "animation" in stat_data and all(
+            ["makesRequest" in i for i in stat_data["animation"]]
+        ):
             print(f"{args_lst[0]} already crawled. Skipping...")
             return
-        
+
         # make sure the directory exists
-        os.makedirs('/data/' + args_lst[0].split('//')[1], exist_ok=True)
-        
+        os.makedirs("/data/" + args_lst[0].split("//")[1], exist_ok=True)
+
         # Launch Chrome and install our extension for getting HARs
         driver = webdriver.Chrome(options=options)
         driver.set_page_load_timeout(args_lst[1])
 
-        
         driver.get(args_lst[0])
         time.sleep(2)
         api_override(driver)
         wait_until_loaded(driver, args_lst[1])
-        
-        time.sleep(10)
-        
-        # stat_data['image_alt'] = image_alt_stats(driver)
-        # stat_data['iframe_post_message'] = iframe_and_post_message_stats(driver)
-        # stat_data['lazy_loading'] = lazy_loading_stats(driver)
-        # stat_data['container_style'] = container_style_queries(driver)
-        stat_data['animation'] = keyframes_with_background(driver)
-        
-        print("-"*25)
-        print(fname)
-        print("-"*25)
 
-        f = open(fname, 'w')
+        time.sleep(10)
+
+        stat_data["image_alt"] = image_alt_stats(driver)
+        stat_data["iframe_post_message"] = iframe_and_post_message_stats(driver)
+        stat_data["lazy_loading"] = lazy_loading_stats(driver)
+        stat_data["container_style"] = container_style_queries(driver)
+        stat_data["animation"] = keyframes_with_background(driver)
+
+        print("-" * 25)
+        print(fname)
+        print("-" * 25)
+
+        f = open(fname, "w")
         json_obj = json.dumps(stat_data)
         f.write(json_obj)
         f.close()
@@ -344,43 +348,33 @@ def main(number_of_tries, flag, args_lst):
         else:
             driver.quit()
             # vdisplay.stop()
-            return main(number_of_tries-1, flag, args_lst)
-        
-    # if os.path.isfile(fname):
-    #     f = open(fname, 'r')
-    #     data = json.loads(f.read())
-    #     f.close()
-    # else:
-    #     # open the /data/website file and create the dict
-    #     data = {}
-    #     data['stats'] = {} 
+            return main(number_of_tries - 1, flag, args_lst)
 
-    
     driver.quit()
     # vdisplay.stop()
 
     time.sleep(3)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Parse the command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--websites', nargs='+')
-    parser.add_argument('--timeout', type=int, default=60)
+    parser.add_argument("--websites", nargs="+")
+    parser.add_argument("--timeout", type=int, default=60)
     # parser.add_argument('--extensions')
-    parser.add_argument('--extensions-wait', type=int, default=10)
-    parser.add_argument('--cpu', type=int)
+    parser.add_argument("--extensions-wait", type=int, default=10)
+    parser.add_argument("--cpu", type=int)
     args = parser.parse_args()
-
 
     port = 5907 + args.cpu
     vdisplay = Display(visible=False, size=(1920, 1080))
-    
+
     vdisplay.start()
 
     for website in args.websites:
 
         args_lst = [website, args.timeout, args.cpu]
-    
+
         main(3, 0, args_lst)
 
     vdisplay.stop()

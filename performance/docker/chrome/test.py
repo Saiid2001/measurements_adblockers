@@ -180,12 +180,12 @@ def main(number_of_tries, flag, filterlists_str, args_lst):
     try:
         
         if len(args_lst) == 4 and args_lst[-1] == 'adguard':
-            adblocker_id = common.get_extension_id(driver, args_lst[-1])
+            adblocker_id = common.get_extension_id(driver)
             print(adblocker_id)
             adguard.setup(driver, adblocker_id, lists)
             
         elif len(args_lst) == 4 and args_lst[-1] == 'ublock':
-            ublock_id = common.get_extension_id(driver, args_lst[-1])
+            ublock_id = common.get_extension_id(driver)
             ublock.setup(driver, ublock_id, lists)
             
         stat = stats.Stats(args_lst[1]+10, fname, args_lst[2])

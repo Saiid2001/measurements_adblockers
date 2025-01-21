@@ -51,12 +51,6 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 ADD extensions/ \
     /home/seluser/measure/extensions
 
-# ADD chrome_113/ \
-#     /home/seluser/measure/chrome_113
-
-# ADD browsermob-proxy/ \
-#     /home/seluser/measure/browsermob-proxy
-
 RUN wget -q 'https://github.com/lightbody/browsermob-proxy/releases/download/browsermob-proxy-2.1.4/browsermob-proxy-2.1.4-bin.zip' -O /tmp/browsermob-proxy.zip && \
     unzip /tmp/browsermob-proxy.zip -d /home/seluser/measure && \
     rm /tmp/browsermob-proxy.zip
@@ -67,15 +61,11 @@ ADD cpu.py \
     stats.py \
     /home/seluser/measure/
 
-ADD ram.py \
-    /home/seluser/measure/
-
 ADD test.py \
     /home/seluser/measure/
 
 ADD web.py \
     /home/seluser/measure/
-
 
 ADD filterlists/ \
     /home/seluser/measure/filterlists

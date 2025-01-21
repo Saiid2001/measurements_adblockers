@@ -3,18 +3,16 @@ from filterlists.common import wait_until_loaded
 from selenium.webdriver.common.by import By
 
 
-# # create loggign file
-# import logging
-
-
-# logging.basicConfig(filename='/data/measurement.log', level=logging.DEBUG)
-# log = logging.getLogger('wrapper')
-
-# def print(*args):
-#     log.info("[ADGUARD] %s", " ".join([str(arg) for arg in args]))
-
-
 def keys_match(a: str, b: str):
+    """check if two filter list names are the same, ignoring aliases
+
+    Args:
+        a (str): name of 1st filter list
+        b (str): name of 2nd filter list
+
+    Returns:
+        bool: True if the two filter list names are the same, False otherwise
+    """
 
     _a = a.lower().replace(" ", "").replace("-", "").replace(chr(8211), "")
     _b = b.lower().replace(" ", "").replace("-", "").replace(chr(8211), "")
@@ -23,14 +21,15 @@ def keys_match(a: str, b: str):
 
 
 def interact_for_default(webdriver):
-    
+    """Interact with the page to set the default filter lists"""
+
     # just activate some leaf that should not be activated by default then deactivate it
-    
+
     current_activations = get_current_activations(webdriver)
-    
+
     if current_activations["adguard-social"]["checked"]:
         return False
-    
+
     webdriver.execute_script(
         """
         let elem = document.querySelector(".listEntry[data-key='adguard-social']");
@@ -38,15 +37,15 @@ def interact_for_default(webdriver):
         elem.querySelector(".detailbar label").click();
         """
     )
-    
+
     time.sleep(3)
-    
+
     apply_all_btn = webdriver.find_element(By.ID, "buttonApply")
-    
+
     apply_all_btn.click()
-    
+
     time.sleep(3)
-    
+
     webdriver.execute_script(
         """
         let elem = document.querySelector(".listEntry[data-key='adguard-social']");
@@ -54,24 +53,25 @@ def interact_for_default(webdriver):
         elem.querySelector(".detailbar label").click();
         """
     )
-    
+
     time.sleep(3)
-    
+
     apply_all_btn = webdriver.find_element(By.ID, "buttonApply")
-    
+
     apply_all_btn.click()
-    
+
     time.sleep(4)
-    
+
     current_activations_after = get_current_activations(webdriver)
 
     if current_activations_after["adguard-social"]["checked"]:
         raise ValueError("Failed to deactivate adguard-social")
-    
+
     return True
 
 
 def activate_all(webdriver):
+    """Activate all filter lists"""
     webdriver.execute_script(
         """
         document.querySelectorAll(".listEntry").forEach(function(elem) {
@@ -125,6 +125,7 @@ def activate_all(webdriver):
 
 
 def activate_by_names(webdriver, names: list[str]):
+    """Activate filter lists by their names"""
 
     script_template = """
     let titles = arguments[0];
@@ -209,6 +210,7 @@ def activate_by_names(webdriver, names: list[str]):
 
 
 def get_current_activations(webdriver):
+    """Get the current activations of the filter lists"""
 
     activations = webdriver.execute_script(
         """
@@ -244,6 +246,7 @@ def get_current_activations(webdriver):
 
 
 def verify_selected(webdriver, extension_id, names: list[str] | bool):
+    """Verify that the selected filter lists are activated"""
 
     names_lower_case = (
         [name.lower() for name in names] if not isinstance(names, bool) else []
@@ -268,35 +271,36 @@ def verify_selected(webdriver, extension_id, names: list[str] | bool):
 
     leafs_of_names = set()
 
+    # get all leafs of the selected filter lists
     for title in current_activations:
         for name in names_lower_case:
             if keys_match(name, title):
                 leafs_of_names.update(current_activations[title]["leafs"])
                 break
 
-    # print(names_lower_case)
-    # print(current_activations)
+    # check if the selected filter lists are activated
     for title in current_activations:
 
         checked = current_activations[title]["checked"]
 
         found = False
-        
+
         for key in names_lower_case:
-            
+
             if keys_match(key, title):
                 inconsistencies[key] = not checked
                 found = True
                 break
 
         if not found:
-        
+
             if title in leafs_of_names:
                 continue
-            
+
             inconsistencies[title] = checked
             unmentioned.append(title.lower())
 
+    # check if the selected filter lists are deactivated
     if isinstance(names, list) and any(inconsistencies.values()):
 
         print("INCONSISTENCIES", inconsistencies)
@@ -329,7 +333,7 @@ def verify_selected(webdriver, extension_id, names: list[str] | bool):
 
 
 def select_by_names(webdriver, extension_id: str, names: list[str] | bool):
-
+    """Select filter lists by their names"""
 
     # open empty page
     webdriver.get("about:blank")
@@ -342,12 +346,6 @@ def select_by_names(webdriver, extension_id: str, names: list[str] | bool):
 
     # keep the page open for a while
     time.sleep(3)
-
-    # print current window handle
-    # print(webdriver.current_window_handle)
-
-    # print all window handles
-    # print(webdriver.window_handles)
 
     if not names:
         time.sleep(5)
@@ -387,7 +385,7 @@ def select_by_names(webdriver, extension_id: str, names: list[str] | bool):
             print("ACTIVATING IN BATCH FAILED, FALLING BACK TO SELECTING INDIVIDUALLY")
 
     # FALLBACK
-    
+
     if not activated:
 
         changed_anything = False
@@ -400,8 +398,6 @@ def select_by_names(webdriver, extension_id: str, names: list[str] | bool):
             checked = webdriver.execute_script(
                 'return arguments[0].querySelector("input").checked;', elem
             )
-
-            # print(title, checked, "should check", select_all or (isinstance(names, list) and title.lower() in names_lower_case))
 
             if select_all or (
                 isinstance(names, list) and title.lower() in names_lower_case
@@ -432,6 +428,7 @@ def select_by_names(webdriver, extension_id: str, names: list[str] | bool):
 
 
 def setup(driver, extension_id, filterlists: list | str | None = None):
+    """Setup uBlock Origin with the specified filter lists"""
 
     if filterlists is None:
         print("No filterlists specified, using default")
