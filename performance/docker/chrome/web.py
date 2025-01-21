@@ -295,20 +295,7 @@ def main(number_of_tries, flag, args_lst):
             print(f"{args_lst[0]} already crawled. Skipping...")
             return
 
-        # if the file does not exist skip
-        if not os.path.exists(fname):
-            print(f"{args_lst[0]} does not exist. Skipping...")
-            return
-
-        f = open(fname, "r")
-        stat_data = json.loads(f.read())
-        f.close()
-
-        if "animation" in stat_data and all(
-            ["makesRequest" in i for i in stat_data["animation"]]
-        ):
-            print(f"{args_lst[0]} already crawled. Skipping...")
-            return
+        stat_data = {}
 
         # make sure the directory exists
         os.makedirs("/data/" + args_lst[0].split("//")[1], exist_ok=True)
