@@ -33,3 +33,4 @@ performance/*.pdf
 **/stats_*/*.pdf
 plot_performance.json
 performance/process/web_data_stats/
+*/venv

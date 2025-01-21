@@ -216,6 +216,40 @@ def container_style_queries(driver):
     return driver.execute_script(script)
     
     
+def keyframes_with_background(driver):
+    
+    # get keyframes with background-image
+    
+    script = """
+    var stylesheets = document.styleSheets;
+    var keyframes = [];
+    for (var i = 0; i < stylesheets.length; i++) {
+        
+        try{
+        
+        var rules = stylesheets[i].cssRules;
+        for (var j = 0; j < rules.length; j++) {
+            var rule = rules[j];
+            if (rule.type === 7) {
+                keyframes.push({
+                    'name': rule.name,
+                    'cssText': rule.cssText,
+                    'hasBackgroundImage': rule.cssText.includes('background-image') || rule.cssText.includes('background: url('),
+                    'hasBackground': rule.cssText.includes('background'),
+                    'makesRequest': rule.cssText.includes(' url('),
+                })
+            }
+        }
+
+        } catch (e) {
+            console.log(e);
+            }
+    }
+    return keyframes;
+    """
+    
+    return driver.execute_script(script)
+    
 
 def main(number_of_tries, flag, args_lst):
     
@@ -254,7 +288,20 @@ def main(number_of_tries, flag, args_lst):
         print(args_lst)
         fname = '/data/' + args_lst[0].split('//')[1] + "/stats.json"
         
-        if os.path.exists(fname) and os.path.getsize(fname) > 0:
+        # if os.path.exists(fname) and os.path.getsize(fname) > 0:
+        #     print(f"{args_lst[0]} already crawled. Skipping...")
+        #     return
+        
+        # if the file does not exist skip
+        if not os.path.exists(fname):
+            print(f"{args_lst[0]} does not exist. Skipping...")
+            return
+        
+        f = open(fname, 'r')
+        stat_data = json.loads(f.read())
+        f.close()
+        
+        if 'animation' in stat_data and all(['makesRequest' in i for i in stat_data['animation']]):
             print(f"{args_lst[0]} already crawled. Skipping...")
             return
         
@@ -273,12 +320,11 @@ def main(number_of_tries, flag, args_lst):
         
         time.sleep(10)
         
-        stat_data = {}
-        
-        stat_data['image_alt'] = image_alt_stats(driver)
-        stat_data['iframe_post_message'] = iframe_and_post_message_stats(driver)
-        stat_data['lazy_loading'] = lazy_loading_stats(driver)
-        stat_data['container_style'] = container_style_queries(driver)
+        # stat_data['image_alt'] = image_alt_stats(driver)
+        # stat_data['iframe_post_message'] = iframe_and_post_message_stats(driver)
+        # stat_data['lazy_loading'] = lazy_loading_stats(driver)
+        # stat_data['container_style'] = container_style_queries(driver)
+        stat_data['animation'] = keyframes_with_background(driver)
         
         print("-"*25)
         print(fname)
@@ -327,7 +373,7 @@ if __name__ == '__main__':
 
 
     port = 5907 + args.cpu
-    vdisplay = Display(visible=True, size=(1920, 1080), backend='xvnc', rfbport=port)
+    vdisplay = Display(visible=False, size=(1920, 1080))
     
     vdisplay.start()
 
