@@ -56,7 +56,11 @@ The data is stored inside `performance/docker/chrome/webdata` folder.
 
 ## Data Processing
 
-To process the data, run the following commands inside the `performance/process` folder. *Note: all paths in the commands must be absolute paths.*
+To process the data, run the following commands inside the `performance/process` folder.
+
+*Notes:*
+- all paths in the commands must be absolute paths.
+- If the processes hang, it might be because your system is expecting a display that is not running. To check if this is the case, interrupt the process and check the line it hangs on, if it's related to `pyplot` it is the case. You can use `xvfb` to create a virtual display.
 
 ### Ad-blocker CPU Performance
 
